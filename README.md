@@ -1,3 +1,8 @@
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)]([https://your-app-subdomain.streamlit.app](https://boxbox-f1-dndfjkzz37y6tnq8vrtxms.streamlit.app/))
+
+
+
+
 # 🏎️ BOX BOX // F1 AI Race Strategist
 
 > A high-performance Formula 1 pit wall race strategy suite using real telemetry data.

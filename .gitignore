@@ -1,0 +1,27 @@
+﻿# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches & temporary data
+cache/
+.cache/
+fastf1_cache/
+
+# Saved models
+saved_models/*.joblib
+saved_models/*.txt
+
+# Virtual environments
+venv/
+env/
+.env
+
+# Streamlit runtime
+.streamlit/secrets.toml
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

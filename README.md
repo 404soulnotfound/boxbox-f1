@@ -53,34 +53,6 @@ boxbox-f1/
 
 ---
 
-## Quick start
-
-### 1. Clone and install
-```bash
-git clone https://github.com/404soulnotfound/boxbox-f1.git
-cd boxbox-f1
-pip install -r requirements.txt
-```
-
-### 2. Train models (two options)
-
-**Option A — via terminal (trains all circuits at once, ~5 mins):**
-```bash
-python train.py
-```
-
-**Option B — via the app UI:**
-```bash
-streamlit run app.py
-# Then go to: Tyre Analysis → load a race → click Train Model
-```
-
-### 3. Launch the app
-```bash
-streamlit run app.py
-```
-
----
 
 ## Key concepts implemented
 
@@ -123,20 +95,8 @@ P(SC in remaining laps) = 1 - exp(-circuit_rate × remaining_fraction)
 
 ---
 
-## Deploy to Streamlit Cloud (free)
 
-1. Push to GitHub
-2. Go to [share.streamlit.io](https://share.streamlit.io)
-3. Connect your repo → select `app.py` → deploy
-4. Share the URL on your portfolio / LinkedIn
-
-**Note:** The training step requires FastF1 which downloads data.
-Pre-train models locally, commit the `saved_models/` folder to your repo,
-and Streamlit Cloud will use those cached models directly.
-
----
-
-## Portfolio talking points
+## Talking points
 
 - **Real data, real problem** — Uses official F1 telemetry from FastF1, not synthetic data
 - **Monte Carlo simulation** — Probabilistic reasoning, not just deterministic optimization

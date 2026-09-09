@@ -8,6 +8,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red)
 ![FastF1](https://img.shields.io/badge/FastF1-3.3+-orange)
 ![LightGBM](https://img.shields.io/badge/LightGBM-4.3+-green)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://boxbox-f1-dhdjso32y9mqhwtcmuaegx.streamlit.app/)
 
 ---
 

@@ -1,0 +1,21 @@
+﻿name: Streamlit Deployment Status
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://boxbox-f1-dhdjso32y9mqhwtcmuaegx.streamlit.app/
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Confirm Production Status
+        run: |
+          echo "🚀 Box Box F1 Strategist is active in Production environment!"
+          echo "URL: ${{ steps.deployment.outputs.url }}"

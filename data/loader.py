@@ -63,7 +63,7 @@ def load_race_laps(year: int, circuit: str) -> pd.DataFrame:
 
     # Remove obvious outliers — pit laps, in/out laps, safety car laps
     laps = laps[laps["LapTimeSeconds"] < laps["LapTimeSeconds"].quantile(0.97)]
-    laps = laps[laps["IsPersonalBest"].notna() | laps["LapNumber"] > 1]
+    laps = laps[(laps["IsPersonalBest"].notna()) | (laps["LapNumber"] > 1)]
 
     # Fuel load correction
     # As the race progresses, the car gets lighter so laps get faster

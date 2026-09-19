@@ -1,4 +1,4 @@
-﻿"""
+"""
 pages/3_Backtest.py
 --------------------
 Backtest the AI strategy engine against historical races.
@@ -48,7 +48,7 @@ st.markdown("""
 # Select race
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    bt_year = st.selectbox("Season", [2023, 2022, 2021], index=0, key="bt_year")
+    bt_year = st.selectbox("Season", [2026, 2025, 2024, 2023, 2022, 2021], index=2, key="bt_year")
 with col2:
     bt_circuit = st.selectbox("Circuit", ["Bahrain", "Britain", "Monza", "Spain", "Japan", "Austria"], key="bt_circ")
 with col3:

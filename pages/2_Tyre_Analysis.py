@@ -1,4 +1,4 @@
-﻿"""
+"""
 pages/2_Tyre_Analysis.py
 -------------------------
 Explore historical tyre degradation data from FastF1.
@@ -49,7 +49,7 @@ st.markdown("### 1. Ingest Grand Prix Telemetry")
 
 col_a, col_b, col_c = st.columns(3)
 with col_a:
-    sel_year = st.selectbox("Championship Season", [2024, 2023, 2022, 2021], index=1)
+    sel_year = st.selectbox("Championship Season", [2026, 2025, 2024, 2023, 2022, 2021], index=2)
 with col_b:
     sel_circuit = st.selectbox("Grand Prix Host", [
         "Bahrain", "Saudi Arabia", "Australia", "Azerbaijan",

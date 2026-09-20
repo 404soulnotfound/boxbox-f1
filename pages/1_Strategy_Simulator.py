@@ -1,4 +1,4 @@
-﻿"""
+"""
 pages/1_Strategy_Simulator.py
 ------------------------------
 High-performance interactive strategy simulator page for Box Box F1.
@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from models.simulator import MonteCarloSimulator, RaceState, estimate_undercut, safety_car_probability
 from models.tyre_model import TyreDegModel
+from utils.demo_data import ALL_CIRCUITS
 from utils.ui_theme import inject_f1_theme, render_pit_wall_banner
 
 # --- Page config ---
@@ -47,10 +48,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     st.caption("Live Pit Wall Telemetry & Car State Parameters")
 
-    circuit = st.selectbox("Grand Prix Circuit", [
-        "Bahrain", "Britain", "Monza", "Spain",
-        "Monaco", "Japan", "Austria", "Canada"
-    ])
+    circuit = st.selectbox("Grand Prix Circuit", ALL_CIRCUITS, index=0)
 
     st.markdown("---")
     st.markdown("**Stint Progress**")

@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from data.loader import load_race_laps
 from models.simulator import MonteCarloSimulator, RaceState, safety_car_probability
 from models.tyre_model import TyreDegModel
+from utils.demo_data import ALL_CIRCUITS
 from utils.ui_theme import inject_f1_theme, render_pit_wall_banner
 
 st.set_page_config(page_title="Strategy Backtest // BOX BOX", page_icon="📊", layout="wide")
@@ -50,7 +51,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     bt_year = st.selectbox("Season", [2026, 2025, 2024, 2023, 2022, 2021], index=2, key="bt_year")
 with col2:
-    bt_circuit = st.selectbox("Circuit", ["Bahrain", "Britain", "Monza", "Spain", "Japan", "Austria"], key="bt_circ")
+    bt_circuit = st.selectbox("Circuit", ALL_CIRCUITS, key="bt_circ")
 with col3:
     bt_driver = st.text_input("Driver Code (3 Letters)", value="VER", max_chars=3).upper()
 with col4:

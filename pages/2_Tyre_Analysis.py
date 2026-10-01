@@ -34,15 +34,16 @@ render_pit_wall_banner(
 )
 
 st.markdown("""
-<div class="hero-container" style="padding: 1.5rem 2rem; margin-bottom: 1.5rem;">
-    <div class="hero-tag">DATA TELEMETRY & ML TRAINING LAB</div>
-    <div class="hero-title" style="font-size: 2.2rem;">🔴 PIRELLI TYRE DEGRADATION ANALYSIS</div>
-    <div class="hero-sub" style="font-size: 0.95rem;">
-        Extract raw timing traces from FastF1, filter out fuel load burns (~0.035s per kg per lap),
-        and fit high-precision quantile estimators to predict tyre life cliffs.
+<div class="hero-container">
+    <div class="hero-tag">// MODULE 02 · FASTF1 TELEMETRY INGESTION & LightGBM TRAINING</div>
+    <div class="hero-title">TYRE ANALYSIS</div>
+    <div class="hero-sub">
+        > LOAD REAL FASTF1 RACE DATA → FUEL-CORRECT LAPS → TRAIN QUANTILE REGRESSION MODEL<br>
+        > OUTPUTS: DEG CURVES · P10/P50/P90 BOUNDS · DRIVER STINT MAPS
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # --- Step 1: Load Data ---
 st.markdown("### 1. Ingest Grand Prix Telemetry")

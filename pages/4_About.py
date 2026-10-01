@@ -25,15 +25,16 @@ render_pit_wall_banner(
 )
 
 st.markdown("""
-<div class="hero-container" style="padding: 1.5rem 2rem; margin-bottom: 1.5rem;">
-    <div class="hero-tag">ENGINEERING DOCUMENTATION & METHODOLOGY</div>
-    <div class="hero-title" style="font-size: 2.2rem;">📄 ARCHITECTURE & TECHNICAL SPECIFICATION</div>
-    <div class="hero-sub" style="font-size: 0.95rem;">
-        Complete breakdown of mathematical formulas, quantile regression modeling,
-        vectorized Monte Carlo simulation design, and system trade-offs.
+<div class="hero-container">
+    <div class="hero-tag">// MODULE 04 · ENGINEERING DOCUMENTATION</div>
+    <div class="hero-title">ARCHITECTURE & TECH SPEC</div>
+    <div class="hero-sub">
+        > COMPLETE BREAKDOWN: ML MODELS · MONTE CARLO ENGINE · FUEL PHYSICS · SYSTEM DESIGN<br>
+        > ENGINEERED BY SOUMILI PAL — FASTF1 · LIGHTGBM · NUMPY · STREAMLIT · PLOTLY
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 st.markdown("""
 This documentation details the engineering methodology, mathematical models, 

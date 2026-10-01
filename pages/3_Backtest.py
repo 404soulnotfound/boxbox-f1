@@ -36,15 +36,16 @@ render_pit_wall_banner(
 )
 
 st.markdown("""
-<div class="hero-container" style="padding: 1.5rem 2rem; margin-bottom: 1.5rem;">
-    <div class="hero-tag">HISTORICAL RACE VALIDATION</div>
-    <div class="hero-title" style="font-size: 2.2rem;">📊 STRATEGY BACKTEST & REPLAY ENGINE</div>
-    <div class="hero-sub" style="font-size: 0.95rem;">
-        Replay any real Formula 1 Grand Prix lap-by-lap. Inspect what the AI strategy model
-        would have commanded at critical pit windows vs the actual calls made by real pit walls.
+<div class="hero-container">
+    <div class="hero-tag">// MODULE 03 · HISTORICAL RACE REPLAY ENGINE</div>
+    <div class="hero-title">STRATEGY BACKTEST</div>
+    <div class="hero-sub">
+        > LOAD ANY HISTORICAL GP → REPLAY LAP-BY-LAP → AI RECOMMENDATION VS ACTUAL TEAM CALL<br>
+        > QUANTIFY: SECONDS GAINED OR LOST AT EACH PIT WINDOW
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # Select race
 col1, col2, col3, col4 = st.columns(4)

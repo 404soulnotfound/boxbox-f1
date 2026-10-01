@@ -1,8 +1,8 @@
 """
 app.py
 ------
-Homepage / landing page for Box Box — F1 AI Race Strategist.
-Run with: streamlit run app.py
+Homepage for Box Box — F1 AI Race Strategist.
+Timing Screen Terminal theme.
 """
 
 import streamlit as st
@@ -13,7 +13,7 @@ from models.tyre_model import TyreDegModel
 from utils.ui_theme import inject_f1_theme, render_pit_wall_banner
 
 st.set_page_config(
-    page_title="BOX BOX — F1 AI Race Strategist",
+    page_title="BOX BOX // F1 STRATEGY ENGINE",
     page_icon="🏎️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -21,37 +21,32 @@ st.set_page_config(
 
 inject_f1_theme()
 
-# ─── Live telemetry banner ───────────────────────────────────────────────────
+# ─── Timing Header ───────────────────────────────────────────────────────────
 render_pit_wall_banner(
-    circuit="Bahrain International Circuit",
-    session_type="RACE CONTROL READY",
-    lap_str="READY FOR TELEMETRY",
-    track_temp="38.2°C",
-    air_temp="28.4°C",
+    circuit="All Circuits",
+    session_type="SYSTEM READY",
+    lap_str="AWAITING INPUT",
+    track_temp="--.-°C",
+    air_temp="--.-°C",
     sc_status="TRACK CLEAR"
 )
 
-# ─── Hero Section ────────────────────────────────────────────────────────────
+# ─── Hero ─────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero-container">
-    <div class="hero-tag">FORMULA 1 TELEMETRY & STRATEGY ENGINE</div>
-    <div class="hero-title">BOX BOX // AI RACE STRATEGIST</div>
+    <div class="hero-tag">// FORMULA 1 AI STRATEGY ENGINE — TIMING SCREEN TERMINAL</div>
+    <div class="hero-title">BOX BOX F1</div>
     <div class="hero-sub">
-        High-performance pit stop optimization and tyre degradation modeling powered by 
-        <strong>FastF1 telemetry</strong>, <strong>LightGBM Quantile Regression</strong>, and 
-        <strong>10,000-run Monte Carlo simulations</strong> in sub-200ms.
-    </div>
-    <div style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
-        <span style="background: rgba(225,6,0,0.15); border: 1px solid #e10600; color: #ff6b6b; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">FASTF1 TELEMETRY</span>
-        <span style="background: rgba(56,189,248,0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">LIGHTGBM UNCERTAINTY</span>
-        <span style="background: rgba(0,230,118,0.15); border: 1px solid #00e676; color: #00e676; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">VECTORIZED MONTE CARLO</span>
-        <span style="background: rgba(255,214,0,0.15); border: 1px solid #ffd600; color: #ffd600; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">LIVE UNDERCUT CALCS</span>
+        > REAL FastF1 TELEMETRY  ·  LightGBM QUANTILE REGRESSION  ·  10,000-RUN MONTE CARLO  ·  ALL 22 CIRCUITS<br>
+        > ENTER RACE STATE → GET RANKED PIT STRATEGIES WITH CONFIDENCE SCORES IN &lt;200ms
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ─── System Model Status ─────────────────────────────────────────────────────
-st.markdown("### 📡 ML Model Telemetry & Circuit Weights")
+# ─── ML Model Status ──────────────────────────────────────────────────────────
+st.markdown("""
+<p class="section-title">// SYSTEM STATUS · ML MODEL WEIGHTS</p>
+""", unsafe_allow_html=True)
 
 circuits_to_check = ["Bahrain", "Britain", "Monza", "Spain", "Monaco", "global"]
 any_model = False
@@ -61,111 +56,119 @@ for col, circuit in zip(status_cols, circuits_to_check):
     saved = TyreDegModel.is_saved(circuit)
     if saved:
         any_model = True
-    status_indicator = (
-        '<span style="color: #00e676; font-weight: 700; font-family: monospace;">● READY</span>'
-        if saved else
-        '<span style="color: #ffd600; font-weight: 700; font-family: monospace;">○ DEMO CALIBRATED</span>'
-    )
+    status_txt  = "● ONLINE" if saved else "○ DEMO MODE"
+    status_color = "#00ff87" if saved else "#ffd600"
     col.markdown(f"""
-    <div style="background: #10141e; border: 1px solid {'#1e3a5f' if saved else '#1e2638'};
-                border-radius: 8px; padding: 0.9rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-        <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
-            {circuit}
-        </div>
-        <div style="font-size: 0.85rem;">{status_indicator}</div>
+    <div style="background: #000; border: 1px solid {'#00ff87' if saved else '#1a4a30'};
+                border-top: 2px solid {'#00ff87' if saved else '#e10600'};
+                padding: 0.7rem 0.5rem; text-align: center; font-family: 'Share Tech Mono', monospace;">
+        <div style="font-size: 0.65rem; color: #2a9960; text-transform: uppercase;
+                    letter-spacing: 1.5px; margin-bottom: 4px;">{circuit.upper()}</div>
+        <div style="font-size: 0.8rem; color: {status_color}; font-weight: 700;">{status_txt}</div>
     </div>""", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 if not any_model:
     st.info(
-        "💡 **Notice:** Built-in calibrated profiles for all circuits are active right now! "
-        "You can explore the **Strategy Simulator** or **Circuit Compare** instantly without waiting. "
-        "To train custom LightGBM models on raw FastF1 sessions, head over to **Tyre Analysis**."
+        "// DEMO MODE ACTIVE: Calibrated circuit profiles loaded for all 22 circuits. "
+        "Head to Tyre Analysis to train live LightGBM models on real FastF1 data."
     )
 else:
-    st.success("✅ **Active AI Weights Found:** Ready for high-precision race telemetry analysis.")
+    st.success("// ACTIVE AI WEIGHTS DETECTED — HIGH-PRECISION MODE ENABLED")
 
 st.markdown("---")
 
-# ─── Features Grid ───────────────────────────────────────────────────────────
-st.markdown("### 🏎️ Race Engineer Core Modules")
+# ─── Module Grid ─────────────────────────────────────────────────────────────
+st.markdown("""
+<p class="section-title">// RACE ENGINEER CORE MODULES</p>
+""", unsafe_allow_html=True)
 
 fc1, fc2, fc3 = st.columns(3)
 features = [
-    ("🧠", "LightGBM Tyre Degradation",
-     "Quantile regression predicting fuel-corrected lap times with P10/P50/P90 confidence envelopes per compound.",
-     "pages/1_Strategy_Simulator.py"),
-    ("🎲", "Vectorized Monte Carlo",
-     "Simulates 10,000 race runs simultaneously via NumPy array broadcasting in under 200ms with variable pit windows.",
-     "pages/1_Strategy_Simulator.py"),
-    ("🎯", "Optimal Pit Window Callout",
-     "Calculates immediate delta vs stay-out strategies, evaluating tyre cliff timing and traffic re-entry pockets.",
-     "pages/1_Strategy_Simulator.py"),
-    ("⚔️", "Dynamic Undercut / Overcut",
-     "Computes real-time laps required to overturn delta to car ahead based on pit loss and fresh rubber pace.",
-     "pages/1_Strategy_Simulator.py"),
-    ("🚨", "Stochastic Safety Car Matrix",
-     "Poisson probability distribution modeling SC and VSC deployment odds based on historic circuit crash rates.",
-     "pages/5_Circuit_Compare.py"),
-    ("📊", "Historical Race Replay",
-     "Backtest AI strategy calls lap-by-lap against real GP historical decisions (e.g. Verstappen, Hamilton, Leclerc).",
-     "pages/3_Backtest.py"),
+    ("01", "STRATEGY SIMULATOR",
+     "Input live race state. AI runs 10,000 Monte Carlo sims across Pit Now / +3 / +5 / Stay Out strategies. Returns ranked decisions with P10/P50/P90 race time bounds.",
+     "#e10600"),
+    ("02", "TYRE ANALYSIS",
+     "Load real FastF1 GP data. Train LightGBM quantile regression model on fuel-corrected lap times per compound. View degradation curves and driver stint maps.",
+     "#00ff87"),
+    ("03", "STRATEGY BACKTEST",
+     "Select any historical GP. Replay lap-by-lap. Compare AI pit recommendations vs actual team decisions. Quantify seconds gained or lost.",
+     "#ffd600"),
+    ("04", "CIRCUIT COMPARE",
+     "Side-by-side tyre degradation profiles for any two circuits from the full 22-circuit calendar. SC probability, pit loss delta, deg rate per compound.",
+     "#38bdf8"),
+    ("05", "UNDERCUT / OVERCUT",
+     "Real-time viability check: can fresh rubber recover the 22s pit loss before the race ends? Poisson safety car probability window included.",
+     "#00ff87"),
+    ("06", "LIVE TELEMETRY",
+     "FastF1 API integration with automatic fallback to calibrated demo data on cloud environments. Never crashes — always returns data.",
+     "#e10600"),
 ]
 
-for i, (icon, title, desc, path) in enumerate(features):
+for i, (num, title, desc, color) in enumerate(features):
     col = [fc1, fc2, fc3][i % 3]
     col.markdown(f"""
-    <div class="f1-card" style="min-height: 180px; margin-bottom: 1.25rem;">
-        <div style="font-size: 2rem; margin-bottom: 0.6rem;">{icon}</div>
-        <div style="font-weight: 800; color: #ffffff; font-size: 1.05rem; margin-bottom: 0.4rem; letter-spacing: 0.5px;">
-            {title}
+    <div style="background: #000; border: 1px solid #1a4a30;
+                border-left: 3px solid {color};
+                padding: 1.1rem; margin-bottom: 1rem; min-height: 160px;
+                font-family: 'Share Tech Mono', monospace;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="color: {color}; font-size: 0.7rem; letter-spacing: 2px;">// MODULE {num}</span>
         </div>
-        <div style="color: #94a3b8; font-size: 0.88rem; line-height: 1.55;">
-            {desc}
-        </div>
+        <div style="font-family: 'Orbitron', monospace; color: #ffffff;
+                    font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;
+                    letter-spacing: 1.5px;">{title}</div>
+        <div style="color: #2a9960; font-size: 0.78rem; line-height: 1.6;">{desc}</div>
     </div>
     """, unsafe_allow_html=True)
 
 st.markdown("---")
 
-# ─── Workflow Section ────────────────────────────────────────────────────────
-st.markdown("### 🚦 Race Weekend Workflow")
+# ─── Workflow ─────────────────────────────────────────────────────────────────
+st.markdown("""
+<p class="section-title">// RACE WEEKEND EXECUTION SEQUENCE</p>
+""", unsafe_allow_html=True)
 
 w1, w2, w3, w4 = st.columns(4)
-workflow_steps = [
-    ("1", "TELEMETRY INGESTION", "Fetch historical FP & GP timing via FastF1 API with automatic fuel burn corrections."),
-    ("2", "MODEL CALIBRATION", "Train LightGBM quantile estimators on tyre degradation curves across compounds."),
-    ("3", "RACE SIMULATION", "Evaluate 10,000 stochastic futures: pit now vs offset stints vs overcut."),
-    ("4", "EXECUTE STRATEGY", "Receive definitive 'BOX BOX' or 'STAY OUT' radio recommendations with delta bounds."),
+steps = [
+    ("01", "TELEMETRY INGESTION",  "Fetch historical race laps via FastF1 API with fuel burn correction applied."),
+    ("02", "MODEL CALIBRATION",    "Train LightGBM quantile estimators on per-compound tyre degradation curves."),
+    ("03", "MONTE CARLO SWEEP",    "Evaluate 10,000 stochastic race futures: pit now vs +3 vs +5 vs stay out."),
+    ("04", "STRATEGY CALLOUT",     "Receive BOX BOX or STAY OUT with P10/P50/P90 time bounds and confidence score."),
 ]
-
-for col, (num, step_title, step_desc) in zip([w1, w2, w3, w4], workflow_steps):
+for col, (num, title, desc) in zip([w1, w2, w3, w4], steps):
     col.markdown(f"""
-    <div style="background: #111622; border: 1px solid #1e2638; border-top: 3px solid #e10600; border-radius: 8px; padding: 1.2rem; height: 100%;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="font-size: 1.25rem; font-weight: 900; color: #e10600; font-family: monospace;">0{num}</span>
-            <span style="color: #475569; font-size: 0.75rem;">// STEP</span>
-        </div>
-        <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 0.4rem;">{step_title}</div>
-        <div style="color: #94a3b8; font-size: 0.82rem; line-height: 1.5;">{step_desc}</div>
+    <div style="background: #000; border: 1px solid #1a4a30; border-top: 2px solid #e10600;
+                padding: 1rem; height: 100%; font-family: 'Share Tech Mono', monospace;">
+        <div style="font-family: 'Orbitron', monospace; font-size: 1.3rem;
+                    color: #e10600; font-weight: 900; margin-bottom: 6px;">{num}</div>
+        <div style="color: #ffffff; font-size: 0.8rem; font-weight: 700;
+                    letter-spacing: 1px; margin-bottom: 6px;">{title}</div>
+        <div style="color: #2a9960; font-size: 0.76rem; line-height: 1.55;">{desc}</div>
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("---")
+st.markdown("<br><br>---", unsafe_allow_html=True)
 
-# ─── Footer ──────────────────────────────────────────────────────────────────
+# ─── Footer ───────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,0.06);">
-    🏎️ <strong>BOX BOX // F1 AI Race Strategist</strong> — Engineered by <strong style="color: #ffffff;">Soumili Pal</strong><br>
-    <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 15px; font-size: 0.8rem;">
-        <a href="https://github.com/404soulnotfound" target="_blank" style="color: #38bdf8; text-decoration: none;">GitHub</a> • 
-        <a href="https://www.linkedin.com/in/soumilipal" target="_blank" style="color: #38bdf8; text-decoration: none;">LinkedIn</a> • 
-        <a href="mailto:tidha427@gmail.com" style="color: #38bdf8; text-decoration: none;">tidha427@gmail.com</a>
-    </div>
-    <div style="margin-top: 0.5rem; font-size: 0.72rem; color: #475569;">
-        Built with FastF1, LightGBM, Streamlit & Plotly · Not affiliated with Formula One Management or the FIA.
-    </div>
+<div style="text-align: center; font-family: 'Share Tech Mono', monospace;
+            color: #2a9960; font-size: 0.78rem; padding: 1rem 0;">
+    BOX BOX // F1 AI RACE STRATEGY ENGINE &nbsp;·&nbsp; ENGINEERED BY
+    <strong style="color: #00ff87;">SOUMILI PAL</strong><br>
+    <span style="margin-top: 0.4rem; display: inline-block; font-size: 0.72rem;">
+        <a href="https://github.com/404soulnotfound" target="_blank"
+           style="color: #00ff87; text-decoration: none;">[ GITHUB ]</a>
+        &nbsp;·&nbsp;
+        <a href="https://www.linkedin.com/in/soumilipal" target="_blank"
+           style="color: #00ff87; text-decoration: none;">[ LINKEDIN ]</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:tidha427@gmail.com"
+           style="color: #00ff87; text-decoration: none;">[ EMAIL ]</a>
+    </span><br>
+    <span style="font-size: 0.68rem; color: #1a4a30; margin-top: 4px; display: inline-block;">
+        NOT AFFILIATED WITH FORMULA ONE MANAGEMENT OR THE FIA
+    </span>
 </div>
 """, unsafe_allow_html=True)

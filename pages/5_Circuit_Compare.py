@@ -1,4 +1,4 @@
-﻿"""
+"""
 pages/5_Circuit_Compare.py
 ---------------------------
 Compare tyre degradation profiles and strategy patterns
@@ -33,15 +33,16 @@ render_pit_wall_banner(
 )
 
 st.markdown("""
-<div class="hero-container" style="padding: 1.5rem 2rem; margin-bottom: 1.5rem;">
-    <div class="hero-tag">TRACK METRICS & TYRE WEAR PROFILES</div>
-    <div class="hero-title" style="font-size: 2.2rem;">🗺️ GRAND PRIX CIRCUIT COMPARISON</div>
-    <div class="hero-sub" style="font-size: 0.95rem;">
-        Examine how circuit surface asphalt, lateral cornering loads, pit lane transit times,
-        and historical safety car rates dictate completely contrasting pit window tactics.
+<div class="hero-container">
+    <div class="hero-tag">// MODULE 05 · CIRCUIT INTELLIGENCE DATABASE</div>
+    <div class="hero-title">CIRCUIT COMPARE</div>
+    <div class="hero-sub">
+        > CALIBRATED TYRE DEG PROFILES FOR ALL 22 F1 CALENDAR CIRCUITS<br>
+        > COMPARE: SC RATE · PIT LOSS · DEG RATE · BASE LAP TIME SIDE BY SIDE
     </div>
 </div>
 """, unsafe_allow_html=True)
+
 
 # Circuit selector
 circuits = list(CIRCUIT_PROFILES.keys())

@@ -16,21 +16,26 @@ st.set_page_config(page_title="About & Methodology // BOX BOX", page_icon="📄"
 inject_f1_theme()
 
 render_pit_wall_banner(
-    circuit="TECH SPEC",
-    session_type="METHODOLOGY & SYSTEM ARCHITECTURE",
-    lap_str="SPECIFICATION",
-    track_temp="AI ARCHITECTURE",
-    air_temp="PORTFOLIO READY",
-    sc_status="AUDITED"
+    circuit="SYSTEM SPEC",
+    session_type="METHODOLOGY & ARCHITECTURE",
+    lap_str="FULL SPEC",
+    leader_delta="ML ARCHITECTURE",
+    sc_status="CODE AUDITED",
+    weather_str="PRODUCTION DEPLOYED"
 )
 
 st.markdown("""
-<div class="hero-container">
-    <div class="hero-tag">// MODULE 04 · ENGINEERING DOCUMENTATION</div>
-    <div class="hero-title">ARCHITECTURE & TECH SPEC</div>
-    <div class="hero-sub">
-        > COMPLETE BREAKDOWN: ML MODELS · MONTE CARLO ENGINE · FUEL PHYSICS · SYSTEM DESIGN<br>
-        > ENGINEERED BY SOUMILI PAL — FASTF1 · LIGHTGBM · NUMPY · STREAMLIT · PLOTLY
+<div class="pitwall-card" style="padding: 1.5rem 1.8rem; margin-bottom: 1.5rem;">
+    <div style="font-size: 0.78rem; font-weight: 800; color: #e10600; letter-spacing: 2px; text-transform: uppercase;">
+        ENGINEERING DOCUMENTATION & SYSTEM METHODOLOGY
+    </div>
+    <div style="font-size: 2.2rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; margin: 4px 0;">
+        📄 ARCHITECTURE & TECHNICAL SPECIFICATION
+    </div>
+    <div style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6;">
+        Complete breakdown of mathematical formulas, quantile regression modeling,
+        vectorized Monte Carlo simulation design, and system trade-offs.
+        Engineered by <strong>Soumili Pal</strong>.
     </div>
 </div>
 """, unsafe_allow_html=True)

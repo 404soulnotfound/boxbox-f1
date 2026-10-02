@@ -27,21 +27,25 @@ COMPOUND_COLORS = {0: "#e10600", 1: "#ffd600", 2: "#ffffff", 3: "#39b54a", 4: "#
 COMPOUND_NAMES  = {0: "SOFT", 1: "MEDIUM", 2: "HARD", 3: "INTER", 4: "WET"}
 
 render_pit_wall_banner(
-    circuit="HISTORICAL REPLAY",
-    session_type="STRATEGY ENGINE BACKTEST",
-    lap_str="FULL GRAND PRIX",
-    track_temp="HISTORICAL",
-    air_temp="HISTORICAL",
-    sc_status="SESSION LOGGED"
+    circuit="HISTORICAL GP",
+    session_type="RACE STRATEGY BACKTEST",
+    lap_str="FULL DISTANCE",
+    leader_delta="HISTORICAL DATA",
+    sc_status="SESSION LOGGED",
+    weather_str="HISTORICAL WEATHER"
 )
 
 st.markdown("""
-<div class="hero-container">
-    <div class="hero-tag">// MODULE 03 · HISTORICAL RACE REPLAY ENGINE</div>
-    <div class="hero-title">STRATEGY BACKTEST</div>
-    <div class="hero-sub">
-        > LOAD ANY HISTORICAL GP → REPLAY LAP-BY-LAP → AI RECOMMENDATION VS ACTUAL TEAM CALL<br>
-        > QUANTIFY: SECONDS GAINED OR LOST AT EACH PIT WINDOW
+<div class="pitwall-card" style="padding: 1.5rem 1.8rem; margin-bottom: 1.5rem;">
+    <div style="font-size: 0.78rem; font-weight: 800; color: #e10600; letter-spacing: 2px; text-transform: uppercase;">
+        HISTORICAL RACE VALIDATION ENGINE
+    </div>
+    <div style="font-size: 2.2rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; margin: 4px 0;">
+        📊 STRATEGY BACKTEST & REPLAY ENGINE
+    </div>
+    <div style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6;">
+        Replay any real Formula 1 Grand Prix lap-by-lap. Inspect what the AI strategy model
+        would have commanded at critical pit windows vs the actual calls made by real pit walls.
     </div>
 </div>
 """, unsafe_allow_html=True)

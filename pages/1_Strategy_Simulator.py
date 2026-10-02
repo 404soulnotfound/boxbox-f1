@@ -1,7 +1,13 @@
 """
 pages/1_Strategy_Simulator.py
 ------------------------------
-Strategy Simulator — Timing Screen Terminal theme.
+Option A: Pit Wall Command Center — Interactive Strategy Simulator.
+Features:
+  - Semicircular radial confidence gauges
+  - Steering wheel rotary dials
+  - Circular compound pills
+  - Dedicated Live Telemetry Feed panel
+  - Broadcast ticker banner
 """
 
 import streamlit as st
@@ -15,9 +21,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from models.simulator import MonteCarloSimulator, RaceState, estimate_undercut, safety_car_probability
 from models.tyre_model import TyreDegModel
 from utils.demo_data import ALL_CIRCUITS
-from utils.ui_theme import inject_f1_theme, render_pit_wall_banner
+from utils.ui_theme import (
+    inject_f1_theme,
+    render_pit_wall_banner,
+    render_semicircular_gauge,
+    render_rotary_dial,
+    render_compound_badges_selector,
+    render_telemetry_feed_panel
+)
 
-st.set_page_config(page_title="Strategy Simulator // BOX BOX", page_icon="🏎️", layout="wide")
+st.set_page_config(page_title="Pit Wall Strategy Simulator // BOX BOX", page_icon="🏎️", layout="wide")
 inject_f1_theme()
 
 COMPOUND_COLORS = {"SOFT": "#e10600", "MEDIUM": "#ffd600", "HARD": "#ffffff", "INTER": "#39b54a", "WET": "#0072bb"}
@@ -31,64 +44,71 @@ def load_model(circuit: str):
         return TyreDegModel.load("global")
     return None
 
-# ─── Sidebar ──────────────────────────────────────────────────────────────────
+# ─── Sidebar: F1 Console with Rotary Dials ─────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div style="font-family:'Share Tech Mono',monospace; color:#e10600;
-                font-size:0.75rem; letter-spacing:2px; border-bottom:1px solid #e10600;
-                padding-bottom:8px; margin-bottom:12px;">
-        // TELEMETRY INPUT PANEL
+    <div style="font-weight: 900; color: #ffffff; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 2px solid #e10600; padding-bottom: 6px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+        <span>CIRCUIT SELECTOR</span>
+        <span style="font-size: 0.7rem; color: #e10600; font-family: 'JetBrains Mono', monospace;">PIT WALL</span>
     </div>
     """, unsafe_allow_html=True)
 
-    circuit = st.selectbox("CIRCUIT", ALL_CIRCUITS, index=0)
+    circuit = st.selectbox("Select Grand Prix", ALL_CIRCUITS, index=0, label_visibility="collapsed")
 
-    st.markdown("<div style='border-top:1px solid #1a4a30; margin: 10px 0;'></div>", unsafe_allow_html=True)
-    st.markdown("<span style='font-family:Share Tech Mono,monospace;font-size:0.7rem;color:#e10600;letter-spacing:2px;'>// STINT</span>", unsafe_allow_html=True)
-    total_laps  = st.slider("TOTAL LAPS", min_value=30, max_value=78, value=57)
-    current_lap = st.slider("CURRENT LAP", min_value=1, max_value=total_laps - 3, value=28)
+    st.markdown("""
+    <div style="font-weight: 800; color: #ffffff; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin: 16px 0 6px 0;">
+        COMPOUND SELECTION
+    </div>
+    """, unsafe_allow_html=True)
+    
+    compound = st.selectbox("Fitted Tyre Compound", ["SOFT", "MEDIUM", "HARD"], index=1)
+    render_compound_badges_selector(compound)
 
-    st.markdown("<div style='border-top:1px solid #1a4a30; margin: 10px 0;'></div>", unsafe_allow_html=True)
-    st.markdown("<span style='font-family:Share Tech Mono,monospace;font-size:0.7rem;color:#e10600;letter-spacing:2px;'>// TYRE</span>", unsafe_allow_html=True)
-    compound     = st.selectbox("COMPOUND ON CAR", ["SOFT", "MEDIUM", "HARD"], index=1)
-    tyre_age     = st.slider("TYRE AGE (LAPS)", min_value=1, max_value=40, value=18)
-    new_compound = st.selectbox("NEXT COMPOUND", ["HARD", "MEDIUM", "SOFT"], index=0)
+    st.markdown("<hr style='margin: 12px 0; border-color: rgba(225,6,0,0.2);'>", unsafe_allow_html=True)
 
-    st.markdown("<div style='border-top:1px solid #1a4a30; margin: 10px 0;'></div>", unsafe_allow_html=True)
-    st.markdown("<span style='font-family:Share Tech Mono,monospace;font-size:0.7rem;color:#e10600;letter-spacing:2px;'>// GAPS</span>", unsafe_allow_html=True)
-    gap_ahead  = st.number_input("GAP AHEAD (s)", min_value=0.0, max_value=60.0, value=3.2, step=0.1)
-    gap_behind = st.number_input("GAP BEHIND (s)", min_value=0.0, max_value=60.0, value=1.9, step=0.1)
+    st.markdown("**Stint Telemetry**")
+    total_laps  = st.slider("Total Race Laps", min_value=30, max_value=78, value=57)
+    current_lap = st.slider("Current Lap", min_value=1, max_value=total_laps - 3, value=34)
+    tyre_age     = st.slider("Tyre Age (Laps Completed)", min_value=1, max_value=40, value=16)
+    new_compound = st.selectbox("Compound at Next Stop", ["HARD", "MEDIUM", "SOFT"], index=0)
 
-    st.markdown("<div style='border-top:1px solid #1a4a30; margin: 10px 0;'></div>", unsafe_allow_html=True)
-    st.markdown("<span style='font-family:Share Tech Mono,monospace;font-size:0.7rem;color:#e10600;letter-spacing:2px;'>// CONDITIONS</span>", unsafe_allow_html=True)
-    pit_loss   = st.slider("PIT LANE LOSS (s)", min_value=17.0, max_value=32.0, value=22.5, step=0.5)
-    track_temp = st.slider("TRACK TEMP (°C)", min_value=15, max_value=58, value=38)
-    sc_base    = st.slider("SC RISK FACTOR (%)", min_value=5, max_value=75, value=35)
-    n_sims     = st.select_slider("MC ITERATIONS", options=[1_000, 5_000, 10_000, 20_000], value=10_000)
+    st.markdown("<hr style='margin: 12px 0; border-color: rgba(225,6,0,0.2);'>", unsafe_allow_html=True)
+    st.markdown("**Interval Gaps**")
+    gap_ahead  = st.number_input("Gap Ahead (s)", min_value=0.0, max_value=60.0, value=0.4, step=0.1)
+    gap_behind = st.number_input("Gap Behind (s)", min_value=0.0, max_value=60.0, value=2.8, step=0.1)
 
-    run_btn = st.button("⚡ EXECUTE SIMULATION", type="primary", use_container_width=True)
+    st.markdown("<hr style='margin: 12px 0; border-color: rgba(225,6,0,0.2);'>", unsafe_allow_html=True)
+    st.markdown("**Steering Wheel Rotary Controls**")
+    pit_loss   = st.slider("Pit Lane Loss Delta (s)", min_value=17.0, max_value=32.0, value=22.5, step=0.5)
+    track_temp = st.slider("Track Temp (°C)", min_value=15, max_value=58, value=38)
+    sc_base    = st.slider("Historical SC Risk (%)", min_value=5, max_value=75, value=40)
 
-# ─── Header ───────────────────────────────────────────────────────────────────
+    # Option A bottom-left rotary dials
+    dial_col1, dial_col2, dial_col3 = st.columns(3)
+    with dial_col1:
+        st.markdown(render_rotary_dial("PIT LOSS", f"{pit_loss:.1f}s", rotation_deg=int((pit_loss - 17) * 12), color="#e10600"), unsafe_allow_html=True)
+    with dial_col2:
+        st.markdown(render_rotary_dial("TRACK", f"{track_temp}°C", rotation_deg=int((track_temp - 15) * 5), color="#ffd600"), unsafe_allow_html=True)
+    with dial_col3:
+        st.markdown(render_rotary_dial("SC RISK", f"{sc_base}%", rotation_deg=int(sc_base * 3.6), color="#00e676"), unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    n_sims  = st.select_slider("Monte Carlo Iterations", options=[1_000, 5_000, 10_000, 20_000], value=10_000)
+    run_btn = st.button("⚡ EXECUTE STRATEGY SIMULATION", type="primary", use_container_width=True)
+
+# ─── Top Broadcast Ticker (Option A) ──────────────────────────────────────────
+laps_remaining = max(0, total_laps - current_lap)
+sc_prob = safety_car_probability(sc_base / 100, laps_remaining, total_laps)
+sc_status_text = "SC DEPLOYED - CAUTION" if sc_prob > 0.4 else "TRACK CLEAR - GREEN"
+
 render_pit_wall_banner(
     circuit=circuit,
-    session_type="STRATEGY SIMULATION",
+    session_type="RACE STRATEGY COMPUTED",
     lap_str=f"LAP {current_lap} / {total_laps}",
-    track_temp=f"{track_temp}°C",
-    air_temp=f"{track_temp - 8}°C",
-    sc_status="RACE ACTIVE"
+    leader_delta=f"VER +{gap_ahead:.1f}s",
+    sc_status=sc_status_text,
+    weather_str=f"DRY ({track_temp - 10}°C)"
 )
-
-# ─── Hero ─────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="hero-container">
-    <div class="hero-tag">// MODULE 01 · PIT STOP STRATEGY OPTIMIZER</div>
-    <div class="hero-title">STRATEGY SIMULATOR</div>
-    <div class="hero-sub">
-        > INPUT RACE STATE → 10,000 MONTE CARLO SIMS → RANKED STRATEGY OUTPUT IN &lt;200ms<br>
-        > COMPOUND: SOFT / MEDIUM / HARD · ALL 22 F1 CALENDAR CIRCUITS
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
 # ─── Build Race State ──────────────────────────────────────────────────────────
 state = RaceState(
@@ -100,145 +120,123 @@ state = RaceState(
     gap_behind    = gap_behind,
     pit_loss_time = pit_loss,
     track_temp    = float(track_temp),
-    air_temp      = float(track_temp) - 8,
+    air_temp      = float(track_temp) - 10,
 )
 
-laps_remaining = state.laps_remaining
-sc_prob = safety_car_probability(sc_base / 100, laps_remaining, total_laps)
-
-# ─── Telemetry Row ────────────────────────────────────────────────────────────
-m1, m2, m3, m4, m5, m6 = st.columns(6)
-m1.metric("LAP",        f"L{current_lap}/{total_laps}",  delta=f"{laps_remaining} left", delta_color="off")
-m2.metric("COMPOUND",   compound,                         delta=f"{tyre_age} laps",       delta_color="off")
-m3.metric("GAP AHEAD",  f"+{gap_ahead:.1f}s",            delta="Car ahead",              delta_color="off")
-m4.metric("GAP BEHIND", f"-{gap_behind:.1f}s",           delta="Car behind",             delta_color="off")
-m5.metric("PIT LOSS",   f"{pit_loss:.1f}s",              delta="Delta",                  delta_color="off")
-m6.metric("SC RISK",    f"{sc_prob*100:.0f}%",           delta="Historical",             delta_color="off")
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# ─── Run Simulation ───────────────────────────────────────────────────────────
+# Run Simulation
 model     = load_model(circuit)
 simulator = MonteCarloSimulator(tyre_model=model, n_simulations=n_sims)
 decisions = simulator.compute_best_strategy(state, new_compound=COMPOUND_CODES[new_compound])
 undercut  = estimate_undercut(state)
 best      = decisions[0] if decisions else None
 
-# ─── Primary Call-to-Pit ─────────────────────────────────────────────────────
-if best:
-    is_box_now  = "PIT_NOW" in best.action
-    call_color  = "#e10600" if is_box_now else "#00ff87"
-    radio_call  = "BOX BOX, BOX BOX! IN THIS LAP!" if is_box_now else f"STAY OUT // {best.action.replace('_', ' ')}"
+# ─── Option A Main Grid: Strategy Recommendations + Telemetry Feed ─────────────
+main_col, telemetry_col = st.columns([65, 35])
 
-    st.markdown(f"""
-    <div class="call-to-pit-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-            <div>
-                <div style="font-family:'Share Tech Mono',monospace; font-size:0.7rem;
-                            color:#2a9960; letter-spacing:3px; margin-bottom:6px;">
-                    // PIT WALL RADIO CALLOUT
-                </div>
-                <div style="font-family:'Orbitron',monospace; font-size:1.8rem;
-                            font-weight:900; color:{call_color}; letter-spacing:2px;
-                            text-shadow: 0 0 20px {call_color}40;">
-                    {radio_call}
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-family:'Share Tech Mono',monospace; font-size:0.7rem;
-                            color:#2a9960; letter-spacing:2px;">AI CONFIDENCE</div>
-                <div style="font-family:'Orbitron',monospace; font-size:2rem;
-                            font-weight:900; color:#00ff87;
-                            text-shadow: 0 0 16px rgba(0,255,135,0.5);">
-                    {best.confidence * 100:.1f}%
-                </div>
-            </div>
-        </div>
-        <div style="margin-top:1rem; padding-top:0.9rem;
-                    border-top:1px solid rgba(0,255,135,0.15);
-                    font-family:'Share Tech Mono',monospace; font-size:0.8rem;
-                    color:#2a9960; line-height:1.7;">
-            > {best.reasoning}
-        </div>
-        <div style="display:flex; gap:12px; margin-top:0.9rem; flex-wrap:wrap;
-                    font-family:'Share Tech Mono',monospace; font-size:0.78rem;">
-            <span style="border:1px solid #1a4a30; padding:4px 10px;">
-                P10 <strong style="color:#00ff87;">{best.p10_time:.1f}s</strong>
-            </span>
-            <span style="border:1px solid #1a4a30; padding:4px 10px;">
-                P50 <strong style="color:#ffffff;">{best.p50_time:.1f}s</strong>
-            </span>
-            <span style="border:1px solid #1a4a30; padding:4px 10px;">
-                P90 <strong style="color:#ffd600;">{best.p90_time:.1f}s</strong>
-            </span>
-            <span style="border:1px solid {COMPOUND_COLORS.get(best.recommended_compound,'#fff')}40;
-                         padding:4px 10px; color:{COMPOUND_COLORS.get(best.recommended_compound,'#fff')};">
-                ● {best.recommended_compound}
-            </span>
-        </div>
+with main_col:
+    st.markdown("""
+    <div class="pitwall-card-header">
+        <span>STRATEGY RECOMMENDATIONS</span>
+        <span style="color: #e10600; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">10,000 MONTE CARLO ITERATIONS</span>
     </div>
     """, unsafe_allow_html=True)
 
-# ─── Candidate Strategy Rows ──────────────────────────────────────────────────
-st.markdown("""
-<p class="section-title">// RANKED CANDIDATE STRATEGIES</p>
-""", unsafe_allow_html=True)
+    for i, d in enumerate(decisions):
+        is_rec = d.is_recommended
+        card_class = "strategy-row-card recommended" if is_rec else "strategy-row-card"
+        gauge_color = "#e10600" if is_rec else ("#ffd600" if i == 1 else "#38bdf8")
+        badge_label = "★ OPTIMAL CALL" if is_rec else f"+{d.expected_time_loss:.1f}s DELTA"
+        badge_color = "#00e676" if is_rec else "#94a3b8"
+        confidence_pct = d.confidence * 100
 
-# Render as a timing-screen style table
-st.markdown("""
-<div class="timing-row header">
-    <div>RNK</div>
-    <div>ACTION</div>
-    <div>COMPOUND</div>
-    <div>CONFIDENCE</div>
-    <div>P10</div>
-    <div>P50 (MEDIAN)</div>
-    <div>P90</div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="{card_class}">
+            <div style="min-width: 170px;">
+                <div style="font-size: 0.75rem; color: {badge_color}; font-weight: 800; letter-spacing: 1px;">
+                    {badge_label}
+                </div>
+                <div style="font-weight: 900; font-size: 1.15rem; color: #ffffff; letter-spacing: 0.5px; margin-top: 2px;">
+                    {d.action.replace('_', ' ')}
+                </div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">
+                    FITTING: <strong style="color: {COMPOUND_COLORS.get(d.recommended_compound, '#fff')};">● {d.recommended_compound}</strong>
+                </div>
+            </div>
+            
+            <div class="strategy-bar-container">
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">
+                    <span>CONFIDENCE INDEX</span>
+                    <span style="color: #ffffff; font-weight: 700;">{confidence_pct:.1f}%</span>
+                </div>
+                <div class="strategy-progress-bg">
+                    <div class="strategy-progress-fill" style="width: {confidence_pct}%; background: linear-gradient(90deg, #7a0300 0%, {gauge_color} 100%);"></div>
+                </div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">
+                    P50 EXP: <strong style="color: #ffffff;">{d.p50_time:.1f}s</strong> (P10: {d.p10_time:.1f}s / P90: {d.p90_time:.1f}s)
+                </div>
+            </div>
 
-for i, d in enumerate(decisions):
-    comp_col  = COMPOUND_COLORS.get(d.recommended_compound, "#fff")
-    rank_col  = "#e10600" if i == 0 else "#00ff87" if i == 1 else "#2a9960"
-    action_lbl = d.action.replace("_", " ")
-    badge     = "★ OPTIMAL" if d.is_recommended else f"+{d.expected_time_loss:.1f}s"
+            <div style="min-width: 90px; text-align: center;">
+                {render_semicircular_gauge(confidence_pct, size=88, color=gauge_color)}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div class="timing-row" style="{'border-left: 3px solid #e10600;' if i==0 else ''}">
-        <div class="timing-pos">#{i+1}</div>
-        <div style="font-family:'Share Tech Mono',monospace; color:#fff; font-weight:700;">
-            {action_lbl}
-            <span style="font-size:0.7rem; color:{rank_col}; margin-left:8px;">{badge}</span>
+    # Radio Engineer Callout
+    if best:
+        is_box_now = "PIT_NOW" in best.action
+        radio_color = "#e10600" if is_box_now else "#00e676"
+        radio_call  = "BOX BOX, BOX BOX! IN THIS LAP!" if is_box_now else f"STAY OUT // EXTEND STINT ({best.action})"
+        st.markdown(f"""
+        <div style="background: rgba(225, 6, 0, 0.1); border: 1px solid #e10600; border-left: 4px solid #e10600; border-radius: 6px; padding: 12px 16px; margin-top: 8px;">
+            <div style="font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">
+                📻 PIT WALL RADIO DIRECTIVE
+            </div>
+            <div style="font-size: 1.35rem; font-weight: 900; color: {radio_color}; letter-spacing: 1px; margin-top: 2px;">
+                {radio_call}
+            </div>
+            <div style="color: #cbd5e1; font-size: 0.85rem; margin-top: 6px; line-height: 1.5;">
+                <strong>Engineer Rationale:</strong> {best.reasoning}
+            </div>
         </div>
-        <div style="color:{comp_col}; font-weight:700; font-family:'Share Tech Mono',monospace;">
-            ● {d.recommended_compound}
-        </div>
-        <div style="color:#00ff87; font-family:'Share Tech Mono',monospace; font-weight:700;">
-            {d.confidence*100:.0f}%
-        </div>
-        <div style="color:#00ff87; font-family:'Share Tech Mono',monospace;">{d.p10_time:.1f}s</div>
-        <div style="color:#fff;   font-family:'Share Tech Mono',monospace; font-weight:700;">{d.p50_time:.1f}s</div>
-        <div style="color:#ffd600;font-family:'Share Tech Mono',monospace;">{d.p90_time:.1f}s</div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+with telemetry_col:
+    render_telemetry_feed_panel(
+        driver="VER",
+        lap=current_lap,
+        speed=314,
+        fuel_kg=max(0, 110.0 - current_lap * 1.6),
+        tire_temp_fl=96 + int(tyre_age * 0.4),
+        sector_delta="-0.18s",
+        pit_lane_status="CLEAR (22.5s LOSS)",
+        radio_msg="BOX THIS LAP" if (best and "PIT_NOW" in best.action) else "MONITOR PACE"
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ─── Charts ───────────────────────────────────────────────────────────────────
-col_ch1, col_ch2 = st.columns(2)
+# ─── Option A Bottom Row: Charts ──────────────────────────────────────────────
+st.markdown("""
+<div class="pitwall-card-header">
+    <span>TELEMETRY & STRATEGY VISUALIZATION</span>
+    <span style="color: #94a3b8; font-size: 0.75rem;">LIVE CHARTS</span>
+</div>
+""", unsafe_allow_html=True)
 
-CHART_LAYOUT = dict(
-    paper_bgcolor="#000000",
-    plot_bgcolor="#000000",
-    font=dict(color="#00ff87", family="Share Tech Mono"),
-    height=320,
-    margin=dict(l=20, r=20, t=30, b=20),
-    xaxis=dict(showgrid=True, gridcolor="rgba(0,255,135,0.07)", color="#2a9960", linecolor="#1a4a30"),
-    yaxis=dict(showgrid=True, gridcolor="rgba(0,255,135,0.07)", color="#2a9960", linecolor="#1a4a30"),
+ch1, ch2, ch3 = st.columns(3)
+
+CHART_THEME = dict(
+    paper_bgcolor="#0d1017",
+    plot_bgcolor="#090b0e",
+    font=dict(color="#cbd5e1", family="Titillium Web"),
+    height=280,
+    margin=dict(l=15, r=15, t=30, b=20),
+    xaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.05)", color="#94a3b8"),
+    yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.05)", color="#94a3b8"),
 )
 
-with col_ch1:
-    st.markdown("""<p class="section-title" style="font-size:0.72rem;">// STRATEGY RACE TIME · P10/P50/P90</p>""", unsafe_allow_html=True)
+with ch1:
+    st.markdown("<span style='font-size:0.8rem; font-weight:800; color:#e10600;'>STRATEGY DELTA UNCERTAINTY (P10 / P50 / P90)</span>", unsafe_allow_html=True)
     fig_time = go.Figure()
     for d in decisions:
         fig_time.add_trace(go.Bar(
@@ -249,26 +247,26 @@ with col_ch1:
                 type="data",
                 array=[d.p90_time - d.p50_time],
                 arrayminus=[d.p50_time - d.p10_time],
-                visible=True, color="#2a9960", thickness=2,
+                visible=True, color="#94a3b8", thickness=2,
             ),
             marker=dict(
-                color="rgba(225,6,0,0.7)" if d.is_recommended else "rgba(0,255,135,0.15)",
-                line=dict(color="#e10600" if d.is_recommended else "#1a4a30", width=1.5)
+                color="#e10600" if d.is_recommended else "#1e293b",
+                line=dict(color="#ff4d4d" if d.is_recommended else "#334155", width=1.5)
             ),
             showlegend=False,
         ))
-    layout = {**CHART_LAYOUT}
-    layout["yaxis"] = dict(**layout["yaxis"], title="Total Race Seconds")
-    fig_time.update_layout(**layout)
+    layout_time = {**CHART_THEME}
+    layout_time["yaxis"] = dict(**layout_time["yaxis"], title="Total Race Seconds")
+    fig_time.update_layout(**layout_time)
     st.plotly_chart(fig_time, use_container_width=True)
 
-with col_ch2:
-    st.markdown("""<p class="section-title" style="font-size:0.72rem;">// TYRE DEGRADATION CURVES</p>""", unsafe_allow_html=True)
+with ch2:
+    st.markdown("<span style='font-size:0.8rem; font-weight:800; color:#ffd600;'>PIRELLI TYRE DEGRADATION (S / M / H)</span>", unsafe_allow_html=True)
     ages = list(range(1, 41))
     traces = []
     if model and model.is_trained:
         for comp_name, comp_code in [("SOFT", 0), ("MEDIUM", 1), ("HARD", 2)]:
-            times = [model.predict_lap_time(comp_code, a, float(track_temp)-8, float(track_temp))["p50"] for a in ages]
+            times = [model.predict_lap_time(comp_code, a, float(track_temp)-10, float(track_temp))["p50"] for a in ages]
             traces.append((comp_name, ages, times))
     else:
         deg = {0: 0.082, 1: 0.046, 2: 0.024}
@@ -288,96 +286,77 @@ with col_ch2:
         ))
     fig_deg.add_vline(x=tyre_age, line_dash="dash", line_color="#e10600", line_width=2,
                       annotation_text=f"LAP {tyre_age}", annotation_font_color="#e10600")
-    layout2 = {**CHART_LAYOUT}
-    layout2["xaxis"] = dict(**layout2["xaxis"], title="Tyre Age (Laps)")
-    layout2["yaxis"] = dict(**layout2["yaxis"], title="Lap Time (s)")
-    layout2["legend"] = dict(bgcolor="#000", bordercolor="#1a4a30")
-    fig_deg.update_layout(**layout2)
+    layout_deg = {**CHART_THEME}
+    layout_deg["xaxis"] = dict(**layout_deg["xaxis"], title="Tyre Age (Laps)")
+    layout_deg["yaxis"] = dict(**layout_deg["yaxis"], title="Lap Time (s)")
+    layout_deg["legend"] = dict(bgcolor="rgba(10,12,16,0.8)", bordercolor="#1e2638")
+    fig_deg.update_layout(**layout_deg)
     st.plotly_chart(fig_deg, use_container_width=True)
 
-# ─── Tactical Panel ───────────────────────────────────────────────────────────
-st.markdown("---")
-st.markdown("""<p class="section-title">// TACTICAL ANALYSIS · UNDERCUT / SC WINDOW</p>""", unsafe_allow_html=True)
+with ch3:
+    st.markdown("<span style='font-size:0.8rem; font-weight:800; color:#38bdf8;'>MONTE CARLO PROBABILITY DENSITY</span>", unsafe_allow_html=True)
+    if len(decisions) >= 2:
+        best_d   = decisions[0]
+        second_d = decisions[1]
+        n_plot   = 2_000
+        sim_best   = np.random.normal(best_d.p50_time, (best_d.p90_time - best_d.p10_time) / 2.56, n_plot)
+        sim_second = np.random.normal(second_d.p50_time, (second_d.p90_time - second_d.p10_time) / 2.56, n_plot)
 
-u1, u2, u3 = st.columns(3)
-with u1:
+        fig_dist = go.Figure()
+        fig_dist.add_trace(go.Histogram(
+            x=sim_best, name=f"#1 {best_d.action.replace('_',' ')}", nbinsx=40,
+            marker_color="#e10600", opacity=0.75,
+        ))
+        fig_dist.add_trace(go.Histogram(
+            x=sim_second, name=f"#2 {second_d.action.replace('_',' ')}", nbinsx=40,
+            marker_color="#38bdf8", opacity=0.55,
+        ))
+        layout_dist = {**CHART_THEME}
+        layout_dist["barmode"] = "overlay"
+        layout_dist["xaxis"] = dict(**layout_dist["xaxis"], title="Race Seconds")
+        layout_dist["yaxis"] = dict(**layout_dist["yaxis"], title="Sims")
+        layout_dist["legend"] = dict(bgcolor="rgba(10,12,16,0.8)", bordercolor="#1e2638")
+        fig_dist.update_layout(**layout_dist)
+        st.plotly_chart(fig_dist, use_container_width=True)
+
+# ─── Tactical Undercut Bar ─────────────────────────────────────────────────────
+st.markdown("<hr style='margin: 1.5rem 0; border-color: rgba(255,255,255,0.06);'>", unsafe_allow_html=True)
+uc1, uc2, uc3 = st.columns(3)
+with uc1:
     viable = undercut["viable"]
-    color  = "#00ff87" if viable else "#e10600"
+    color = "#00e676" if viable else "#e10600"
     st.markdown(f"""
-    <div class="terminal-panel">
-        <div class="t-dim">// UNDERCUT VIABILITY</div>
-        <div style="font-family:'Orbitron',monospace; font-size:1.3rem;
-                    color:{color}; font-weight:900; margin: 8px 0;
-                    text-shadow: 0 0 12px {color}60;">
+    <div style="background:#10141e; border: 1px solid {color}; border-radius: 6px; padding: 12px;">
+        <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">UNDERCUT VIABILITY</div>
+        <div style="font-size: 1.4rem; font-weight: 900; color: {color}; margin-top: 2px;">
             {"✓ FEASIBLE" if viable else "✗ HIGH RISK"}
         </div>
-        <div class="t-dim" style="font-size:0.78rem;">{undercut["recommendation"]}</div>
+        <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">{undercut['recommendation']}</div>
     </div>
     """, unsafe_allow_html=True)
 
-with u2:
+with uc2:
     ltr = undercut.get("laps_to_recover")
     st.markdown(f"""
-    <div class="terminal-panel">
-        <div class="t-dim">// LAPS TO OVERTURN GAP</div>
-        <div style="font-family:'Orbitron',monospace; font-size:1.3rem;
-                    color:#fff; font-weight:900; margin: 8px 0;">
+    <div style="background:#10141e; border: 1px solid #1e2638; border-radius: 6px; padding: 12px;">
+        <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">LAPS TO OVERTURN GAP</div>
+        <div style="font-size: 1.4rem; font-weight: 900; color: #ffffff; margin-top: 2px; font-family: 'JetBrains Mono', monospace;">
             {f"{ltr:.1f} LAPS" if ltr else "OVERCUT / DEFEND"}
         </div>
-        <div class="t-dim" style="font-size:0.78rem;">
-            Based on {pit_loss:.1f}s pit loss vs deg pace delta.
-        </div>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Based on {pit_loss:.1f}s pit stop time loss.</div>
     </div>
     """, unsafe_allow_html=True)
 
-with u3:
-    sc_text_color = "#00ff87" if sc_prob < 0.25 else ("#ffd600" if sc_prob < 0.5 else "#e10600")
+with uc3:
     st.markdown(f"""
-    <div class="terminal-panel">
-        <div class="t-dim">// SAFETY CAR RISK WINDOW</div>
-        <div style="font-family:'Orbitron',monospace; font-size:1.3rem;
-                    color:{sc_text_color}; font-weight:900; margin: 8px 0;
-                    text-shadow: 0 0 12px {sc_text_color}60;">
+    <div style="background:#10141e; border: 1px solid #1e2638; border-radius: 6px; padding: 12px;">
+        <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">SAFETY CAR RISK WINDOW</div>
+        <div style="font-size: 1.4rem; font-weight: 900; color: {'#ffd600' if sc_prob>0.3 else '#00e676'}; margin-top: 2px; font-family: 'JetBrains Mono', monospace;">
             {sc_prob*100:.1f}% PROBABILITY
         </div>
-        <div class="t-dim" style="font-size:0.78rem;">
-            Poisson model · {laps_remaining} laps remaining.
-        </div>
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Poisson expectation over {laps_remaining} remaining laps.</div>
     </div>
     """, unsafe_allow_html=True)
 
-# ─── MC Distribution ──────────────────────────────────────────────────────────
-if len(decisions) >= 2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""<p class="section-title">// MONTE CARLO OUTCOME DENSITY · BEST vs 2ND</p>""", unsafe_allow_html=True)
-    best_d   = decisions[0]
-    second_d = decisions[1]
-    n_plot   = 2_500
-
-    sim_best   = np.random.normal(best_d.p50_time,   (best_d.p90_time   - best_d.p10_time) / 2.56, n_plot)
-    sim_second = np.random.normal(second_d.p50_time, (second_d.p90_time - second_d.p10_time) / 2.56, n_plot)
-
-    fig_dist = go.Figure()
-    fig_dist.add_trace(go.Histogram(
-        x=sim_best,   name=f"#1 {best_d.action.replace('_',' ')}",   nbinsx=60,
-        marker_color="rgba(225,6,0,0.7)", opacity=0.8,
-    ))
-    fig_dist.add_trace(go.Histogram(
-        x=sim_second, name=f"#2 {second_d.action.replace('_',' ')}", nbinsx=60,
-        marker_color="rgba(0,255,135,0.4)", opacity=0.7,
-    ))
-    layout3 = {**CHART_LAYOUT}
-    layout3["barmode"] = "overlay"
-    layout3["xaxis"] = dict(**layout3["xaxis"], title="Race Elapsed Time (s)")
-    layout3["yaxis"] = dict(**layout3["yaxis"], title="Iteration Count")
-    layout3["legend"] = dict(bgcolor="#000", bordercolor="#1a4a30")
-    layout3["height"] = 260
-    fig_dist.update_layout(**layout3)
-    st.plotly_chart(fig_dist, use_container_width=True)
-
-st.markdown("---")
-st.markdown("""
-<div style="font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:#1a4a30;">
-    BOX BOX F1 // BUILT WITH FASTF1 &amp; LIGHTGBM · NOT AFFILIATED WITH FORMULA ONE MANAGEMENT
-</div>
-""", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
+st.caption("🏎️ BOX BOX // Pit Wall Command Center. Built with FastF1 & LightGBM.")

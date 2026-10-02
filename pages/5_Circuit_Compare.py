@@ -25,20 +25,24 @@ COMPOUND_NAMES  = {0: "SOFT", 1: "MEDIUM", 2: "HARD"}
 
 render_pit_wall_banner(
     circuit="CALENDAR BENCHMARK",
-    session_type="CIRCUIT COMPARISON & WEAR PROFILES",
-    lap_str="CROSS-CIRCUIT",
-    track_temp="MULTI-TRACK",
-    air_temp="MULTI-TRACK",
-    sc_status="CIRCUIT PROFILES"
+    session_type="CIRCUIT INTELLIGENCE",
+    lap_str="22 CIRCUITS",
+    leader_delta="HISTORICAL TIERS",
+    sc_status="CALIBRATED",
+    weather_str="GLOBAL CALENDAR"
 )
 
 st.markdown("""
-<div class="hero-container">
-    <div class="hero-tag">// MODULE 05 · CIRCUIT INTELLIGENCE DATABASE</div>
-    <div class="hero-title">CIRCUIT COMPARE</div>
-    <div class="hero-sub">
-        > CALIBRATED TYRE DEG PROFILES FOR ALL 22 F1 CALENDAR CIRCUITS<br>
-        > COMPARE: SC RATE · PIT LOSS · DEG RATE · BASE LAP TIME SIDE BY SIDE
+<div class="pitwall-card" style="padding: 1.5rem 1.8rem; margin-bottom: 1.5rem;">
+    <div style="font-size: 0.78rem; font-weight: 800; color: #e10600; letter-spacing: 2px; text-transform: uppercase;">
+        TRACK METRICS & TYRE WEAR PROFILES
+    </div>
+    <div style="font-size: 2.2rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; margin: 4px 0;">
+        🗺️ GRAND PRIX CIRCUIT COMPARISON
+    </div>
+    <div style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6;">
+        Examine how circuit surface asphalt, lateral cornering loads, pit lane transit times,
+        and historical safety car rates dictate completely contrasting pit window tactics across all 22 calendar circuits.
     </div>
 </div>
 """, unsafe_allow_html=True)

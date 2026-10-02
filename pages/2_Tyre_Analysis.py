@@ -26,20 +26,24 @@ COMPOUND_NAMES  = {0: "SOFT", 1: "MEDIUM", 2: "HARD", 3: "INTER", 4: "WET"}
 
 render_pit_wall_banner(
     circuit="TELEMETRY LAB",
-    session_type="TYRE DEGRADATION & ML TRAINING",
-    lap_str="HISTORICAL TELEMETRY",
-    track_temp="VARIABLE",
-    air_temp="VARIABLE",
-    sc_status="SESSION READY"
+    session_type="TYRE DEGRADATION LAB",
+    lap_str="FASTF1 SESSIONS",
+    leader_delta="INGESTION ACTIVE",
+    sc_status="SESSION READY",
+    weather_str="MULTI-SESSION"
 )
 
 st.markdown("""
-<div class="hero-container">
-    <div class="hero-tag">// MODULE 02 · FASTF1 TELEMETRY INGESTION & LightGBM TRAINING</div>
-    <div class="hero-title">TYRE ANALYSIS</div>
-    <div class="hero-sub">
-        > LOAD REAL FASTF1 RACE DATA → FUEL-CORRECT LAPS → TRAIN QUANTILE REGRESSION MODEL<br>
-        > OUTPUTS: DEG CURVES · P10/P50/P90 BOUNDS · DRIVER STINT MAPS
+<div class="pitwall-card" style="padding: 1.5rem 1.8rem; margin-bottom: 1.5rem;">
+    <div style="font-size: 0.78rem; font-weight: 800; color: #e10600; letter-spacing: 2px; text-transform: uppercase;">
+        DATA TELEMETRY & ML TRAINING LAB
+    </div>
+    <div style="font-size: 2.2rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; margin: 4px 0;">
+        🔴 PIRELLI TYRE DEGRADATION ANALYSIS
+    </div>
+    <div style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6;">
+        Extract raw timing traces from FastF1, filter out fuel load burns (~0.035s per kg per lap),
+        and fit high-precision LightGBM quantile estimators (P10/P50/P90) to predict tyre life cliffs.
     </div>
 </div>
 """, unsafe_allow_html=True)

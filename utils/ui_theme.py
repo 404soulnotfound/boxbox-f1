@@ -416,3 +416,28 @@ def render_cockpit_compound_buttons(active_compound: str = "MEDIUM"):
         """
     html += '</div>'
     st.markdown(html, unsafe_allow_html=True)
+
+
+# ── Backward-compatible aliases (old names still used in app.py and other pages) ──
+def render_pit_wall_banner(
+    circuit: str = "Bahrain",
+    session_type: str = "RACE",
+    lap_str: str = "LAP 34 / 57",
+    track_temp: str = "36°C",
+    air_temp: str = "26°C",
+    sc_status: str = "TRACK CLEAR",
+    leader_delta: str = "VER +0.4s",
+    weather_str: str = "DRY (28°C)"
+):
+    """Alias for render_cockpit_top_bar — keeps old page imports working."""
+    render_cockpit_top_bar(
+        lap_str=lap_str,
+        leader_delta=leader_delta,
+        sc_status=sc_status,
+        weather_str=weather_str,
+    )
+
+
+def render_compound_badges_selector(active_compound: str = "MEDIUM"):
+    """Alias for render_cockpit_compound_buttons — keeps old page imports working."""
+    render_cockpit_compound_buttons(active_compound)

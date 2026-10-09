@@ -1,14 +1,13 @@
 """
 pages/4_About.py
 -----------------
-Portfolio explainer page — written for recruiters and hiring managers
-who want to understand what was built, why it's technically impressive,
-and what skills it demonstrates.
+About & Engineering Methodology page for Box Box F1.
+Presents the technical architecture, domain problem, and system specifications.
 """
 
 import streamlit as st
-
 import sys, os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from utils.ui_theme import inject_f1_theme, render_pit_wall_banner
 
@@ -33,18 +32,16 @@ st.markdown("""
         📄 ARCHITECTURE & TECHNICAL SPECIFICATION
     </div>
     <div style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6;">
-        Complete breakdown of mathematical formulas, quantile regression modeling,
-        vectorized Monte Carlo simulation design, and system trade-offs.
+        System architecture, mathematical models, and domain engineering challenges behind <strong>Box Box</strong>.
         Engineered by <strong>Soumili Pal</strong>.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-
 st.markdown("""
 This documentation details the engineering methodology, mathematical models, 
 and system architecture behind **Box Box**. Explore the sections below to understand
-how real telemetry data is processed, how tyre degradation curves are estimated, 
+how real telemetry data is processed, how uncertainty intervals are quantified, 
 and how Monte Carlo simulations derive optimal pit stop strategies in real time.
 """)
 
@@ -54,12 +51,11 @@ st.markdown("---")
 st.markdown("""
 **Jump to:**  
 [What problem this solves](#what-problem-this-solves) ·
-[How the AI works](#how-the-ai-works) ·
-[Why these tools](#why-these-tools) ·
 [Key technical challenges](#key-technical-challenges-solved) ·
-[Skills demonstrated](#skills-demonstrated) ·
-[Limitations](#honest-limitations) ·
-[What real F1 teams do differently](#what-real-f1-teams-do-differently)
+[System benchmarks](#project-by-the-numbers) ·
+[System scope & limitations](#system-scope-limitations) ·
+[Real F1 trackside comparison](#what-real-f1-teams-do-differently) ·
+[Engineered by](#engineered-by)
 """)
 
 st.markdown("---")
@@ -98,104 +94,6 @@ of possible race outcomes.
 
 st.markdown("---")
 
-# ─── How the AI works ─────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">HOW THE AI WORKS</p>', unsafe_allow_html=True)
-st.markdown("#### Three-layer architecture:")
-
-st.markdown("""
-**Layer 1 — Tyre degradation model (LightGBM)**
-
-The first question the system must answer is: *how fast are this car's tyres degrading right now?*
-
-Raw lap times can't answer this because they include the effect of fuel burning off
-(~0.035 seconds per kg, ~1.6kg burned per lap). A car on lap 5 is naturally faster
-than the same car on lap 1 because it's lighter — that has nothing to do with tyres.
-
-The model corrects for this:
-""")
-
-st.code("""
-FuelCorrectedTime = RawLapTime - (FuelLoad_kg × 0.035s)
-FuelLoad_kg       = 110kg - (LapNumber × 1.6kg)
-""", language="python")
-
-st.markdown("""
-Once corrected, the model learns how each compound (Soft / Medium / Hard) degrades
-as tyre age increases. It uses **quantile regression** — so instead of predicting
-a single lap time, it predicts a full distribution: P10 (optimistic), P50 (median),
-P90 (pessimistic). This uncertainty feeds directly into the simulator.
-""")
-
-st.markdown("---")
-
-st.markdown("""
-**Layer 2 — Monte Carlo race simulator (NumPy)**
-
-Given the tyre model's output, the simulator answers: *what total race time does
-each strategy produce?*
-
-It runs 10,000 independent simulations of the remaining laps, where each simulation
-randomly samples:
-- Lap time noise (±0.15s normally distributed)
-- Safety car events (Poisson distributed at ~0.008 probability per lap)
-- Pit stop variability (±1.5s normally distributed around the circuit average)
-
-The key engineering insight: **all 10,000 simulations run simultaneously** using
-NumPy array broadcasting, not a Python for-loop. This keeps 10k simulations under 200ms.
-""")
-
-st.code("""
-# SLOW — Python loop over simulations (don't do this)
-for sim in range(10_000):
-    total_time[sim] = simulate_one_race(...)   # 10,000 function calls
-
-# FAST — vectorized NumPy (what this project does)
-times_2d = np.tile(lap_times_1d, (10_000, 1))       # shape: (10000, n_laps)
-noise    = np.random.normal(0, 0.15, (10_000, n_laps))
-results  = (times_2d + noise).sum(axis=1)            # all sims in one operation
-""", language="python")
-
-st.markdown("---")
-
-st.markdown("""
-**Layer 3 — Strategy ranker**
-
-The simulator returns a distribution of total race times per strategy.
-The ranker picks the strategy with the **lowest median** total time (P50),
-then computes a confidence score based on how much better it is vs the alternatives.
-
-It also runs two separate sub-models:
-- **Undercut viability**: can we recover the pit loss time within the remaining laps given our tyre deg rate advantage on fresh rubber?
-- **Safety car probability**: using a Poisson model calibrated on each circuit's historical SC rate, what's the probability of a free pit in the next N laps?
-""")
-
-st.markdown("---")
-
-# ─── Why these tools ──────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">WHY THESE TOOLS</p>', unsafe_allow_html=True)
-
-decisions = [
-    ("Why LightGBM over XGBoost or a neural network?",
-     "LightGBM trains faster on tabular data and handles the small dataset sizes per circuit better. Neural networks need more data to generalise — we have maybe 400–600 laps per circuit per year. LightGBM also natively supports quantile regression for uncertainty intervals."),
-    ("Why Monte Carlo over analytical optimisation?",
-     "An analytical optimiser (e.g. dynamic programming) would find the deterministic optimum — the strategy that's best if everything goes exactly as predicted. But races aren't deterministic. A safety car changes everything. MC simulation naturally handles uncertainty by sampling from probability distributions, which is why real F1 teams use it."),
-    ("Why Streamlit over FastAPI + React?",
-     "This is a portfolio project. Streamlit lets you build a fully interactive, shareable web app in pure Python with zero backend knowledge. The AI work (tyre model, MC simulator) is the impressive part — not the server architecture. Streamlit gets it in front of people fast."),
-    ("Why FastF1 for data?",
-     "FastF1 is the only library with official F1 timing data going back to 2018 including lap times, tyre compounds, tyre age, sector times, and weather. The data comes directly from the FOM (Formula One Management) timing system. It's as close to real team data as a public project can get."),
-    ("Why per-circuit models instead of one global model?",
-     "Monza is a power circuit — tyres barely degrade because there are few slow corners. Monaco is the opposite — tyres overheat due to low speeds and high steering input. A single global model would learn the average across all circuits and perform poorly on both. Separate models per circuit capture this correctly."),
-]
-
-for q, a in decisions:
-    st.markdown(f"""
-    <div class="decision-row">
-        <div class="q">🤔 {q}</div>
-        <div class="a">{a}</div>
-    </div>""", unsafe_allow_html=True)
-
-st.markdown("---")
-
 # ─── Key challenges ────────────────────────────────────────────────────────────
 st.markdown('<p class="section-title">KEY TECHNICAL CHALLENGES SOLVED</p>', unsafe_allow_html=True)
 
@@ -221,47 +119,6 @@ for icon, title, desc in challenges:
 
 st.markdown("---")
 
-# ─── Skills demonstrated ───────────────────────────────────────────────────────
-st.markdown('<p class="section-title">SKILLS DEMONSTRATED</p>', unsafe_allow_html=True)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("**Data Science & ML**")
-    skills_ds = [
-        "Supervised learning (LightGBM regression)",
-        "Quantile regression for uncertainty intervals",
-        "Feature engineering with domain knowledge",
-        "Temporal cross-validation (GroupShuffleSplit)",
-        "Probabilistic forecasting (P10 / P50 / P90)",
-        "Monte Carlo simulation",
-        "Poisson probability modelling",
-        "Per-group model training (per circuit)",
-        "Model serialisation (joblib)",
-        "Experiment tracking concepts (MLflow-ready)",
-    ]
-    for s in skills_ds:
-        st.markdown(f"<span class='skill-badge'>✓ {s}</span>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("**Engineering & Software**")
-    skills_eng = [
-        "Vectorized NumPy for performance",
-        "Modular Python package structure",
-        "Dataclass-based data modelling",
-        "Streamlit multi-page app architecture",
-        "Plotly interactive visualisations",
-        "Real API integration (FastF1)",
-        "Caching for performance (st.cache_resource)",
-        "Model persistence and loading",
-        "Error handling and graceful fallbacks",
-        "Streamlit Cloud deployment",
-    ]
-    for s in skills_eng:
-        st.markdown(f"<span class='skill-badge'>✓ {s}</span>", unsafe_allow_html=True)
-
-st.markdown("---")
-
 # ─── Numbers ───────────────────────────────────────────────────────────────────
 st.markdown('<p class="section-title">PROJECT BY THE NUMBERS</p>', unsafe_allow_html=True)
 
@@ -270,8 +127,8 @@ metrics = [
     ("1,796", "Lines of code"),
     ("10,000", "Simulations per decision"),
     ("~80ms", "Simulation runtime"),
-    ("3", "AI models"),
-    ("3", "App pages"),
+    ("22", "Circuits supported"),
+    ("5", "App modules"),
 ]
 for col, (val, lbl) in zip([n1, n2, n3, n4, n5], metrics):
     col.markdown(f"""
@@ -283,18 +140,17 @@ for col, (val, lbl) in zip([n1, n2, n3, n4, n5], metrics):
 st.markdown("---")
 
 # ─── Limitations ───────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">HONEST LIMITATIONS</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">SYSTEM SCOPE & LIMITATIONS</p>', unsafe_allow_html=True)
 
 st.markdown("""
-Being honest about limitations is part of good data science. Here's what this project
-does NOT do and why:
+Key technical boundaries and telemetry assumptions applied in the current release:
 """)
 
 limitations = [
     ("No live race integration",
      "OpenF1 provides a real-time API but integrating WebSocket streams with Streamlit requires additional architecture (FastAPI + background threads). The current app works on historical data or manual state input. The simulator itself is live-ready — it's just the data feed that's manual."),
     ("Gap data is estimated in backtest",
-     "FastF1 doesn't provide live gap-to-car-ahead data in its lap-level dataset. The backtest page uses random estimates for gaps. Real team systems have millisecond-precise gap data from the FOM timing feed."),
+     "FastF1 doesn't provide live gap-to-car-ahead data in its lap-level dataset. The backtest page uses calibrated estimates for gaps. Real team systems have millisecond-precise gap data from the FOM timing feed."),
     ("No opponent modelling",
      "The simulator models your car's strategy in isolation. A complete system would model each opponent's tyre state and predict their pit windows, then simulate the interaction. This requires tracking all 20 cars simultaneously."),
     ("Training data volume",
@@ -316,8 +172,7 @@ st.markdown("---")
 st.markdown('<p class="section-title">WHAT REAL F1 TEAMS DO DIFFERENTLY</p>', unsafe_allow_html=True)
 
 st.markdown("""
-This section shows awareness of the gap between a portfolio project and production systems —
-which is exactly what senior interviewers want to see.
+A comparison between public telemetry modeling and team-grade proprietary trackside infrastructure:
 """)
 
 gaps = [
@@ -338,33 +193,6 @@ for title, desc in gaps:
     <div class="insight-box">
         <div class="label">📌 {title}</div>
         <p>{desc}</p>
-    </div>""", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ─── How to extend ─────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">HOW TO EXTEND THIS PROJECT</p>', unsafe_allow_html=True)
-
-st.markdown("Natural next steps if you want to keep building:")
-
-extensions = [
-    ("Connect OpenF1 real-time feed", "Replace manual state input with live data during race weekends. FastF1 + OpenF1 together give you everything needed.", "Medium"),
-    ("Add opponent tracking", "Track all 20 cars' tyre states and predict their pit windows. Show on a timing-tower style display.", "Hard"),
-    ("RL strategy agent", "Train a PPO agent in a custom Gymnasium environment where it must choose pit/stay/push each lap. Compare vs MC simulator decisions.", "Hard"),
-    ("SHAP explainability", "Add SHAP values to explain exactly which features drove each lap time prediction — 'tyre age contributed +0.4s, track temp contributed −0.1s'.", "Medium"),
-    ("Weather integration", "Connect Open-Meteo API for live rain probability. When rain >50% in N laps, surface Intermediate compound recommendation.", "Medium"),
-    ("Multi-car simulation", "Simulate all cars simultaneously to find strategies that account for traffic — not just your own optimal line.", "Expert"),
-]
-
-for title, desc, difficulty in extensions:
-    color = {"Medium": "#ffcc00", "Hard": "#ff8844", "Expert": "#e8002d"}[difficulty]
-    st.markdown(f"""
-    <div class="decision-row">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="q">{title}</div>
-            <span style="font-size:0.75rem;color:{color};font-weight:700">{difficulty}</span>
-        </div>
-        <div class="a" style="margin-top:4px">{desc}</div>
     </div>""", unsafe_allow_html=True)
 
 st.markdown("---")

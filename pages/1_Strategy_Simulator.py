@@ -202,47 +202,47 @@ with col_strat:
         # Gradient bar
         fill_grad = "linear-gradient(90deg, #e10600 0%, #ffd600 100%)" if i == 0 else "linear-gradient(90deg, #4b5563 0%, #ffd600 100%)"
 
-        st.markdown(f"""
-        <div class="cockpit-strategy-row {active_cls}">
-            <div class="cockpit-strategy-info">
-                <div style="display: flex; align-items: baseline;">
-                    <span class="cockpit-strategy-num">{i+1}</span>
-                    <span class="cockpit-strategy-title">STRATEGY {i+1} ({action_name}): {int(conf)}%</span>
-                </div>
-                <div class="cockpit-strategy-sub">Projected effectiveness meter · P50: {d.p50_time:.1f}s</div>
-            </div>
-            
-            <div class="cockpit-strategy-bar">
-                <div class="cockpit-bar-track">
-                    <div class="cockpit-bar-fill" style="width: {conf}%; background: {fill_grad};"></div>
-                </div>
-            </div>
-
-            <div style="min-width: 96px; text-align: center;">
-                {render_cockpit_speedo_gauge(conf, size=94, color=gauge_color)}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        strat_html = (
+            f'<div class="cockpit-strategy-row {active_cls}">'
+            f'<div class="cockpit-strategy-info">'
+            f'<div style="display: flex; align-items: baseline;">'
+            f'<span class="cockpit-strategy-num">{i+1}</span>'
+            f'<span class="cockpit-strategy-title">STRATEGY {i+1} ({action_name}): {int(conf)}%</span>'
+            f'</div>'
+            f'<div class="cockpit-strategy-sub">Projected effectiveness meter · P50: {d.p50_time:.1f}s</div>'
+            f'</div>'
+            f'<div class="cockpit-strategy-bar">'
+            f'<div class="cockpit-bar-track">'
+            f'<div class="cockpit-bar-fill" style="width: {conf}%; background: {fill_grad};"></div>'
+            f'</div>'
+            f'</div>'
+            f'<div style="min-width: 96px; text-align: center;">'
+            f'{render_cockpit_speedo_gauge(conf, size=94, color=gauge_color)}'
+            f'</div>'
+            f'</div>'
+        )
+        st.markdown(strat_html, unsafe_allow_html=True)
 
     # Radio Command Box
     if best:
         is_box = "PIT_NOW" in best.action
         directive_color = "#e10600" if is_box else "#00e676"
         directive_text  = "BOX BOX, BOX BOX! IN THIS LAP!" if is_box else f"STAY OUT // EXTEND STINT ({best.action})"
-        st.markdown(f"""
-        <div style="background: rgba(225, 6, 0, 0.12); border: 1px solid #e10600; border-left: 4px solid #e10600; border-radius: 6px; padding: 10px 14px; margin-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px;">RADIO CALLOUT</span>
-                <span style="font-size: 0.72rem; color: #00e676; font-weight: 700;">CONFIDENCE: {best.confidence*100:.1f}%</span>
-            </div>
-            <div style="font-size: 1.2rem; font-weight: 900; color: {directive_color}; letter-spacing: 1px; margin-top: 2px;">
-                {directive_text}
-            </div>
-            <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">
-                <strong>Rationale:</strong> {best.reasoning}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        radio_html = (
+            '<div style="background: rgba(225, 6, 0, 0.12); border: 1px solid #e10600; border-left: 4px solid #e10600; border-radius: 6px; padding: 10px 14px; margin-top: 10px;">'
+            '<div style="display: flex; justify-content: space-between; align-items: center;">'
+            '<span style="font-size: 0.72rem; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px;">RADIO CALLOUT</span>'
+            f'<span style="font-size: 0.72rem; color: #00e676; font-weight: 700;">CONFIDENCE: {best.confidence*100:.1f}%</span>'
+            '</div>'
+            f'<div style="font-size: 1.2rem; font-weight: 900; color: {directive_color}; letter-spacing: 1px; margin-top: 2px;">'
+            f'{directive_text}'
+            '</div>'
+            f'<div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 4px;">'
+            f'<strong>Rationale:</strong> {best.reasoning}'
+            '</div>'
+            '</div>'
+        )
+        st.markdown(radio_html, unsafe_allow_html=True)
 
 # ── 3. RIGHT COLUMN: "LIVE TELEMETRY FEED" (Exact Match to Mockup) ─────────────
 with col_feed:
@@ -273,12 +273,12 @@ with col_feed:
 
     feed_html = '<div style="background: #090b0e; border: 1px solid #1e2638; border-radius: 6px; padding: 10px 14px;">'
     for k, v, col in telemetry_rows:
-        feed_html += f"""
-        <div class="cockpit-feed-item">
-            <span class="feed-key">{k}</span>
-            <span class="feed-val" style="color: {col};">{v}</span>
-        </div>
-        """
+        feed_html += (
+            f'<div class="cockpit-feed-item">'
+            f'<span class="feed-key">{k}</span>'
+            f'<span class="feed-val" style="color: {col};">{v}</span>'
+            f'</div>'
+        )
     feed_html += '</div>'
     st.markdown(feed_html, unsafe_allow_html=True)
 

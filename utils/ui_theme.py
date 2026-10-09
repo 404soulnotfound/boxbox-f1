@@ -333,22 +333,19 @@ def render_cockpit_top_bar(
     weather_str: str = "WEATHER: DRY 28°C"
 ):
     """Renders the top F1 broadcast caution ticker matching Mockup 1."""
-    st.markdown(f"""
-    <div class="f1-cockpit-bar">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="f1-badge">F1</span>
-            <span style="color: #ffffff; letter-spacing: 1px;">{lap_str}</span>
-            <span style="color: #4b5563;">|</span>
-            <span style="color: #ffffff;">{leader_delta}</span>
-        </div>
-        <div>
-            <span class="caution-pill">● {sc_status}</span>
-        </div>
-        <div>
-            <span style="color: #38bdf8;">{weather_str}</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    html = (
+        '<div class="f1-cockpit-bar">'
+        '<div style="display: flex; align-items: center; gap: 12px;">'
+        '<span class="f1-badge">F1</span>'
+        f'<span style="color: #ffffff; letter-spacing: 1px;">{lap_str}</span>'
+        '<span style="color: #4b5563;">|</span>'
+        f'<span style="color: #ffffff;">{leader_delta}</span>'
+        '</div>'
+        f'<div><span class="caution-pill">● {sc_status}</span></div>'
+        f'<div><span style="color: #38bdf8;">{weather_str}</span></div>'
+        '</div>'
+    )
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_cockpit_speedo_gauge(percentage: float, size: int = 96, color: str = "#e10600") -> str:
@@ -357,49 +354,37 @@ def render_cockpit_speedo_gauge(percentage: float, size: int = 96, color: str = 
     Features illuminated tick marks, glowing red arc, and large bold percentage.
     """
     pct = max(0.0, min(100.0, float(percentage)))
-    # Semicircle arc: Center (50, 48), radius 36. Arc from (14, 48) to (86, 48)
-    # Length = pi * 36 ~= 113.1
     arc_len = 113.1
     offset = arc_len * (1.0 - (pct / 100.0))
 
-    return f"""
-    <svg width="{size}" height="{int(size * 0.7)}" viewBox="0 0 100 68" style="display: block; margin: 0 auto; filter: drop-shadow(0 0 8px {color}70);">
-        <!-- Background Track -->
-        <path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#1a202c" stroke-width="7" stroke-linecap="round" />
-        <!-- Tick Marks Pattern -->
-        <path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#2d3748" stroke-width="8" stroke-dasharray="2 6" stroke-linecap="butt" />
-        <!-- Filled Glowing Arc -->
-        <path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="{color}" stroke-width="7"
-              stroke-dasharray="{arc_len:.1f}" stroke-dashoffset="{offset:.1f}" stroke-linecap="round" />
-        <!-- Inner Gauge Value -->
-        <text x="50" y="46" text-anchor="middle" font-family="'JetBrains Mono', monospace"
-              font-size="16" font-weight="900" fill="#ffffff">{int(pct)}%</text>
-    </svg>
-    """
+    return (
+        f'<svg width="{size}" height="{int(size * 0.7)}" viewBox="0 0 100 68" style="display: block; margin: 0 auto; filter: drop-shadow(0 0 8px {color}70);">'
+        '<path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#1a202c" stroke-width="7" stroke-linecap="round" />'
+        '<path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#2d3748" stroke-width="8" stroke-dasharray="2 6" stroke-linecap="butt" />'
+        f'<path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="{color}" stroke-width="7" stroke-dasharray="{arc_len:.1f}" stroke-dashoffset="{offset:.1f}" stroke-linecap="round" />'
+        f'<text x="50" y="46" text-anchor="middle" font-family="\'JetBrains Mono\', monospace" font-size="16" font-weight="900" fill="#ffffff">{int(pct)}%</text>'
+        '</svg>'
+    )
 
 
 def render_cockpit_rotary_knob(label: str, value: str, angle_deg: int = 0, color: str = "#e10600") -> str:
     """
     Renders the physical steering-wheel rotary dial knob seen in the bottom-left of Mockup 1.
     """
-    return f"""
-    <div class="rotary-knob-box">
-        <svg width="52" height="52" viewBox="0 0 60 60">
-            <!-- Outer Bezel -->
-            <circle cx="30" cy="30" r="26" fill="#090b0e" stroke="#1e2638" stroke-width="2" />
-            <!-- Ticks -->
-            <circle cx="30" cy="30" r="22" fill="#141822" stroke="#252f44" stroke-width="1.5" stroke-dasharray="2 5" />
-            <!-- Inner Raised Knob -->
-            <circle cx="30" cy="30" r="15" fill="#0b0d12" stroke="#2d3748" stroke-width="2" />
-            <!-- Rotating Indicator Line -->
-            <g transform="rotate({angle_deg} 30 30)">
-                <line x1="30" y1="17" x2="30" y2="25" stroke="{color}" stroke-width="3" stroke-linecap="round" />
-            </g>
-        </svg>
-        <div class="rotary-knob-label">{label}</div>
-        <div class="rotary-knob-val">{value}</div>
-    </div>
-    """
+    return (
+        '<div class="rotary-knob-box">'
+        '<svg width="52" height="52" viewBox="0 0 60 60">'
+        '<circle cx="30" cy="30" r="26" fill="#090b0e" stroke="#1e2638" stroke-width="2" />'
+        '<circle cx="30" cy="30" r="22" fill="#141822" stroke="#252f44" stroke-width="1.5" stroke-dasharray="2 5" />'
+        '<circle cx="30" cy="30" r="15" fill="#0b0d12" stroke="#2d3748" stroke-width="2" />'
+        f'<g transform="rotate({angle_deg} 30 30)">'
+        f'<line x1="30" y1="17" x2="30" y2="25" stroke="{color}" stroke-width="3" stroke-linecap="round" />'
+        '</g>'
+        '</svg>'
+        f'<div class="rotary-knob-label">{label}</div>'
+        f'<div class="rotary-knob-val">{value}</div>'
+        '</div>'
+    )
 
 
 def render_cockpit_compound_buttons(active_compound: str = "MEDIUM"):
@@ -409,13 +394,10 @@ def render_cockpit_compound_buttons(active_compound: str = "MEDIUM"):
     for name, cls, col in compounds:
         is_active = (name.upper() == active_compound.upper())
         active_cls = "active" if is_active else ""
-        html += f"""
-        <div class="pirelli-circle {cls} {active_cls}">
-            {name}
-        </div>
-        """
+        html += f'<div class="pirelli-circle {cls} {active_cls}">{name}</div>'
     html += '</div>'
     st.markdown(html, unsafe_allow_html=True)
+
 
 
 # ── Backward-compatible aliases (old names still used in app.py and other pages) ──
